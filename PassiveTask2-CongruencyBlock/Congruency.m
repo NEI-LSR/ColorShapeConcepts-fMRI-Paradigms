@@ -2,7 +2,7 @@ function Congruency(subject, run, IMA)
     % Congruency Paradigm 1.0
     % Adapted by Helen Feibes 06/2024 from 
     % Shape Color Paradigm 2.2, Stuart J. Duffield November 2021
-    % Displays congruent and incongruent stimuli from the Monkey Turk experiments in blocks
+    % Displays congruent and incongruent stimuli from the ColorShapeConcept experiments in blocks
 
     % Initialize DAQ
     DAQ('Debug',false);
@@ -16,7 +16,7 @@ function Congruency(subject, run, IMA)
     ttlChannel = 8;
     rewardDur = 0.01; % seconds
     rewardWait = 3.0; % seconds
-    rewardPerf = .80; % 90% fixation to get reward
+    rewardPerf = .90; % fixation to get reward
     
     
     
@@ -60,7 +60,7 @@ function Congruency(subject, run, IMA)
     runDur = TR*blocklength*length(blockorder); % Ensure this is correct
     exactDur = 576; %720; % Specify this to check 
     
-    if runDur ~= exactDur % Check or else you waste your scan time
+    if runDur ~= exactDur % Check or else your scan and paradigm times will not match
         error('Run duration calculated from run parameters does not match hardcoded run duration length.')
     end
     
@@ -70,9 +70,8 @@ function Congruency(subject, run, IMA)
     load([stimDir '/' 'inchrom.mat'], 'inchrom'); % Chromatic Shapes Incongruent
     stimsize = size(chrom(:,:,1,1)); % What size is the simulus? In pixels
     grayTex = cat(3,repmat(gray(1),stimsize(1)),repmat(gray(2),stimsize(1)),repmat(gray(3),stimsize(1)),repmat(255,stimsize(1))); % Greates a gray texture the size of the stimulus. 
-    % I do this because the way the code works right now is that it
-    % requires a texture to be displayed at any given frame. Not great, but
-    % allows the code to be easily modifiable, and the gray texture only
+    % Use because code requires a texture to be displayed at any given frame.
+    % Allows the code to be easily modifiable, and the gray texture only
     % takes up one texture in memory.
     
     % Initialize Screens
@@ -90,11 +89,13 @@ function Congruency(subject, run, IMA)
     [xCenter, yCenter] = RectCenter(viewRect); % Get center of the view screen
     [xCenterExp, yCenterExp] = RectCenter(expRect); % Get center of the experimentor's screen
     
-    pixPerAngle = 40; % Number of pixels per degree of visual angle
-    stimPix = 6*pixPerAngle; % How large the stimulus rectangle will be
-    jitterPix = 1*pixPerAngle; % How large the jitter will be
-    fixPix = 1*pixPerAngle; % How large the fixation will be
-    
+    pixPerAngle = 1920/(rad2deg(atan(1/57))*38.2); % Number of pixels per degree of visual angle, rounds to 50.00
+    pixScaleFactor = 40/pixPerAngle; % This corrects for an initial error in the pixPerAngle measurement and reflects the true
+    % values of the params relying on pixPerAngle 
+    stimPix = 6*pixperAngle*pixScaleFactor; % How large the stimulus rectangle will i.e., 240 pixels, or 4.8 degrees visual angle
+    jitterPix = 1*pixperAngle*pixScaleFactor; % How large the jitter will be
+    fixPix = 1*pixperAngle*pixScaleFactor; % How large the fixation will be
+
     
     fixCrossDimPix = 10; % Fixation cross arm length
     lineWidthPix = 2; % Fixation cross arm thickness
@@ -202,12 +203,12 @@ function Congruency(subject, run, IMA)
                 yOffset = yOffset + eyePosition(frameIdx,2)-yCenterExp;
             elseif keyCode(KbName('j')) % Juice
                 juiceOn = true;
-            elseif keyCode(KbName('w')) && fixPix > pixPerAngle/2 % Increase fixation circle
-                fixPix = fixPix - pixPerAngle/2; % Shrink fixPix by half a degree of visual angle
+            elseif keyCode(KbName('w')) && fixPix > pixperAngle*pixScaleFactor/2 % Increase fixation circle
+                fixPix = fixPix - pixperAngle*pixScaleFactor/2; % Shrink fixPix by about half a degree of visual angle
                 baseFixRect = [0 0 fixPix fixPix]; % Size of the fixation circle
                 fixRect = CenterRectOnPointd(baseFixRect, xCenterExp, yCenterExp); % We center the fixation rectangle on the center of the screen
-            elseif keyCode(KbName('s')) && fixPix < pixPerAngle*10
-                fixPix = fixPix + pixPerAngle/2; % Increase fixPix by half a degree of visual angle
+            elseif keyCode(KbName('s')) && fixPix < pixperAngle*pixScaleFactor*10
+                fixPix = fixPix + pixperAngle*pixScaleFactor/2; % Increase fixPix by about half a degree of visual angle
                 baseFixRect = [0 0 fixPix fixPix]; % Size of the fixation circle
                 fixRect = CenterRectOnPointd(baseFixRect, xCenterExp, yCenterExp); % We center the fixation rectangle on the center of the screen
             elseif keyCode(KbName('p'))
@@ -289,7 +290,7 @@ function Congruency(subject, run, IMA)
             juiceDistTime = GetSecs;
             timeSinceLastJuice = GetSecs-juiceDistTime;
         end
-        if timeSinceLastJuice > rewardDur % This won't have the best timing since its linked to the fliprate
+        if timeSinceLastJuice > rewardDur % Linked to the fliprate
             DAQ('SetBit',[0 0 0 0]);
         end
         

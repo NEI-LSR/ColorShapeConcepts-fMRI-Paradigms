@@ -39,7 +39,7 @@ function [params] = fixation(params);
     [xCenter, yCenter] = RectCenter(viewRect); % Get center of the view screen
     [xCenterExp, yCenterExp] = RectCenter(expRect); % Get center of the experimentor's screen
     
-    fixPix = 1*params.pixPerAngle; % How large the fixation will be
+    fixPix = 1*params.pixPerAngle*params.pixScaleFactor; % How large the fixation will be
     stimPix = 200;
     
     fixCrossDimPix = 20; % Fixation cross arm length
@@ -107,36 +107,36 @@ function [params] = fixation(params);
                 params.yOffset = params.yOffset + eyePosition(frameIdx,2)-yCenterExp;
             elseif keyCode(KbName('j')) % Juice
                 juiceOn = true;
-            elseif keyCode(KbName('n')) && fixPix > params.pixPerAngle/2 % Increase fixation circle
-                fixPix = fixPix - params.pixPerAngle/2; % Shrink fixPix by half a degree of visual angle
+            elseif keyCode(KbName('n')) && fixPix > params.pixPerAngle*params.pixScaleFactor/2 % Increase fixation circle
+                fixPix = fixPix - params.pixPerAngle*params.pixScaleFactor/2; % Shrink fixPix by about half a degree of visual angle
                 baseFixRect = [0 0 fixPix fixPix]; % Size of the fixation circle
                 fixRect = CenterRectOnPointd(baseFixRect, xCenterExp, yCenterExp); % We center the fixation rectangle on the center of the screen
-            elseif keyCode(KbName('m')) && fixPix < params.pixPerAngle*10
-                fixPix = fixPix + params.pixPerAngle/2; % Increase fixPix by half a degree of visual angle
+            elseif keyCode(KbName('m')) && fixPix < params.pixPerAngle*params.pixScaleFactor*10
+                fixPix = fixPix + params.pixPerAngle*params.pixScaleFactor/2; % Increase fixPix by half a degree of visual angle
                 baseFixRect = [0 0 fixPix fixPix]; % Size of the fixation circle
                 fixRect = CenterRectOnPointd(baseFixRect, xCenterExp, yCenterExp); % We center the fixation rectangle on the center of the screen
             elseif keyCode(KbName('s')) && yCenter < 1050 % Move fixation up
-                yCenterExp = yCenterExp + params.pixPerAngle;
+                yCenterExp = yCenterExp + params.pixPerAngle*params.pixScaleFactor;
                 fixRect = CenterRectOnPointd(baseFixRect, xCenterExp, yCenterExp); % We center the fixation rectangle on the center of the screen
-                yCenter = yCenter + params.pixPerAngle;
+                yCenter = yCenter + params.pixPerAngle*params.pixScaleFactor;
                 viewStimRect = CenterRectOnPointd(stimRect, xCenter,yCenter);
                 expStimRect = CenterRectOnPointd(stimRect, xCenterExp,yCenterExp);
             elseif keyCode(KbName('w')) && yCenter > 0 % Move fixation down
-                yCenterExp = yCenterExp - params.pixPerAngle;
+                yCenterExp = yCenterExp - params.pixPerAngle*params.pixScaleFactor;
                 fixRect = CenterRectOnPointd(baseFixRect, xCenterExp, yCenterExp); % We center the fixation rectangle on the center of the screen
-                yCenter = yCenter - params.pixPerAngle;
+                yCenter = yCenter - params.pixPerAngle*params.pixScaleFactor;
                 viewStimRect = CenterRectOnPointd(stimRect, xCenter,yCenter);
                 expStimRect = CenterRectOnPointd(stimRect, xCenterExp,yCenterExp);
             elseif keyCode(KbName('d')) && xCenter < 1900 % move fixation right
-                xCenterExp = xCenterExp + params.pixPerAngle;
+                xCenterExp = xCenterExp + params.pixPerAngle*params.pixScaleFactor;
                 fixRect = CenterRectOnPointd(baseFixRect, xCenterExp, yCenterExp); % We center the fixation rectangle on the center of the screen
-                xCenter = xCenter + params.pixPerAngle;
+                xCenter = xCenter + params.pixPerAngle*params.pixScaleFactor;
                 viewStimRect = CenterRectOnPointd(stimRect, xCenter,yCenter);
                 expStimRect = CenterRectOnPointd(stimRect, xCenterExp,yCenterExp);
             elseif keyCode(KbName('a')) && xCenter > 0 % Move fixation left
-                xCenterExp = xCenterExp - params.pixPerAngle;
+                xCenterExp = xCenterExp - params.pixPerAngle*params.pixScaleFactor;
                 fixRect = CenterRectOnPointd(baseFixRect, xCenterExp, yCenterExp); % We center the fixation rectangle on the center of the screen
-                xCenter = xCenter - params.pixPerAngle;
+                xCenter = xCenter - params.pixPerAngle*params.pixScaleFactor;
                 viewStimRect = CenterRectOnPointd(stimRect, xCenter,yCenter);
                 expStimRect = CenterRectOnPointd(stimRect, xCenterExp,yCenterExp);
             elseif keyCode(KbName('f'))

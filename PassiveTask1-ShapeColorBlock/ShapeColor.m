@@ -1,7 +1,7 @@
 function ShapeColor(subject, counterbalance_indx, run, IMA)
     % Shape Color Paradigm 2.2
     % Stuart J. Duffield November 2021
-    % Displays the stimuli from the Monkey Turk experiments in blocks.
+    % Displays the stimuli from the ColorShapeConcepts experiments in blocks.
     % Blocks include gray, colored chromatic shapes, black and white chromatic
     % shapes, achromatic shapes, and colored blobs.
     
@@ -16,9 +16,9 @@ function ShapeColor(subject, counterbalance_indx, run, IMA)
     xChannel = 3;
     yChannel = 2; % DAQ indexes starting at 1, so different than fnDAQ
     ttlChannel = 8;
-    rewardDur = 0.1; % seconds
+    rewardDur = 0.01; % seconds
     rewardWait = 3; % seconds
-    rewardPerf = .90; % 90% fixation to get reward
+    rewardPerf = .90; % fixation to get reward
     
     
     
@@ -55,7 +55,7 @@ function ShapeColor(subject, counterbalance_indx, run, IMA)
     gray = [31 29 47]; 
 
     % Load in block orders:
-    blockorders = csvread('block_design.csv'); % This is produced from the counterbalance script @kurt braunlich wrote for me
+    blockorders = csvread('block_design.csv'); % This is produced from a counterbalance script
     blockorder = (blockorders(counterbalance_indx,:)-1); % We subtract 1 because the csv stores the blocks with indices 1-5, we process them with indices 0-4
     blocklength = 14; % Block length is in TRs. 
     
@@ -64,12 +64,12 @@ function ShapeColor(subject, counterbalance_indx, run, IMA)
     exactDur = 420; % Specify this to check. For experiments prior to 20231215, this was 840s,
                     % and there were 20 blocks (4 repetitions of the same 5-block pattern). 
                     % The old block_design csv is preserved in the
-                    % templates folder as
+                    % folder as
                     % 'block_design_if_exactDuris840_20blocks.csv'. Current
                     % experiments have 10 blocks (2 reps of same 5-block
                     % pattern).
     
-    if runDur ~= exactDur % Check or else you waste your scan time
+    if runDur ~= exactDur % Check or else your scan and paradigm times will not match
         error('Run duration calculated from run parameters does not match hardcoded run duration length.')
     end
     
@@ -81,9 +81,8 @@ function ShapeColor(subject, counterbalance_indx, run, IMA)
     load([stimDir '/' 'colorcircles.mat'], 'colorcircles'); % Colored Circles
     stimsize = size(chrom(:,:,1,1)); % What size is the simulus? In pixels
     grayTex = cat(3,repmat(gray(1),stimsize(1)),repmat(gray(2),stimsize(1)),repmat(gray(3),stimsize(1)),repmat(255,stimsize(1))); % Greates a gray texture the size of the stimulus. 
-    % I do this because the way the code works right now is that it
-    % requires a texture to be displayed at any given frame. Not great, but
-    % allows the code to be easily modifiable, and the gray texture only
+    % Use because code requires a texture to be displayed at any given frame.
+    % Allows the code to be easily modifiable, and the gray texture only
     % takes up one texture in memory.
     
     % Initialize Screens
@@ -101,10 +100,12 @@ function ShapeColor(subject, counterbalance_indx, run, IMA)
     [xCenter, yCenter] = RectCenter(viewRect); % Get center of the view screen
     [xCenterExp, yCenterExp] = RectCenter(expRect); % Get center of the experimentor's screen
     
-    pixPerAngle = 40; % Number of pixels per degree of visual angle
-    stimPix = 6*pixPerAngle; % How large the stimulus rectangle will be
-    jitterPix = 1*pixPerAngle; % How large the jitter will be
-    fixPix = 1*pixPerAngle; % How large the fixation will be
+    pixPerAngle = 1920/(rad2deg(atan(1/57))*38.2); % Number of pixels per degree of visual angle, rounds to 50.00
+    pixScaleFactor = 40/pixPerAngle; % This corrects for an initial error in the pixPerAngle measurement and reflects the true
+    % values of the params relying on pixPerAngle 
+    stimPix = 6*pixperAngle*pixScaleFactor; % How large the stimulus rectangle will be, i.e., 240 pixels, or 4.8 degrees visual angle
+    jitterPix = 1*pixperAngle*pixScaleFactor; % How large the jitter will be
+    fixPix = 1*pixperAngle*pixScaleFactor; % How large the fixation will be
     
     
     fixCrossDimPix = 10; % Fixation cross arm length
@@ -128,8 +129,6 @@ function ShapeColor(subject, counterbalance_indx, run, IMA)
     Movie = cat(4,grayTex,chromBW,chrom,achrom,colorcircles); % Array of all possible stimulus images:
     % Gray (1), Chromatic Black and White (2:15), Chromatic (16:29),
     % Achromatic (30:43), Colored Circles (44:57)
-    % Stuart's note--I need to figure out which index of each texture
-    % corresponds to what
     
     baseTex = NaN(size(Movie, ndims(Movie))); % Creates a vector of NaNs that match the length of each stimulus
     
@@ -149,25 +148,25 @@ function ShapeColor(subject, counterbalance_indx, run, IMA)
                 frames = (1:framesPerBlock)+(i-1)*framesPerBlock;
                 texture(frames) = repmat(baseTex(1),1,framesPerBlock);
                 stimulus_order = [stimulus_order zeros(1,blocklength)];
-            case 1 % Chromatic Shapes Uncolored
+            case 1 % Chromatic Shapes Uncolored (Colorless color-associated shapes)
                 frames = (1:framesPerBlock)+(i-1)*framesPerBlock;
                 order = randperm(blocklength);
                 chromBWTex = baseTex(2:15)
                 texture(frames) = repelem(chromBWTex(order),framesPerStim);
                 stimulus_order = [stimulus_order chromBWTex(order)];
-            case 2 % Chromatic Shapes Colored
+            case 2 % Chromatic Shapes Colored (colored shapes)
                 frames = (1:framesPerBlock)+(i-1)*framesPerBlock;
                 order = randperm(blocklength);
                 chromTex = baseTex(16:29)
                 texture(frames) = repelem(chromTex(order),framesPerStim);
                 stimulus_order = [stimulus_order chromTex(order)];
-            case 3 % Achromatic Shapes
+            case 3 % Achromatic Shapes (colorless non-color-associated shapes)
                 frames = (1:framesPerBlock)+(i-1)*framesPerBlock;
                 order = randperm(blocklength);
                 AchromTex = baseTex(30:43)
                 texture(frames) = repelem(AchromTex(order),framesPerStim);
                 stimulus_order = [stimulus_order AchromTex(order)];
-            case 4 % Colored Circles
+            case 4 % Colored Circles (colored blobs)
                 frames = (1:framesPerBlock)+(i-1)*framesPerBlock;
                 order = randperm(blocklength);
                 circTex = baseTex(44:57)
@@ -228,12 +227,12 @@ function ShapeColor(subject, counterbalance_indx, run, IMA)
                 yOffset = yOffset + eyePosition(frameIdx,2)-yCenterExp;
             elseif keyCode(KbName('j')) % Juice
                 juiceOn = true;
-            elseif keyCode(KbName('w')) && fixPix > pixPerAngle/2 % Increase fixation circle
-                fixPix = fixPix - pixPerAngle/2; % Shrink fixPix by half a degree of visual angle
+            elseif keyCode(KbName('w')) && fixPix > pixperAngle*pixScaleFactor/2 % Increase fixation circle
+                fixPix = fixPix - pixperAngle*pixScaleFactor/2; % Shrink fixPix by about half a degree of visual angle
                 baseFixRect = [0 0 fixPix fixPix]; % Size of the fixation circle
                 fixRect = CenterRectOnPointd(baseFixRect, xCenterExp, yCenterExp); % We center the fixation rectangle on the center of the screen
-            elseif keyCode(KbName('s')) && fixPix < pixPerAngle*10
-                fixPix = fixPix + pixPerAngle/2; % Increase fixPix by half a degree of visual angle
+            elseif keyCode(KbName('s')) && fixPix < pixperAngle*pixScaleFactor*10
+                fixPix = fixPix + pixperAngle*pixScaleFactor/2; % Increase fixPix by about half a degree of visual angle
                 baseFixRect = [0 0 fixPix fixPix]; % Size of the fixation circle
                 fixRect = CenterRectOnPointd(baseFixRect, xCenterExp, yCenterExp); % We center the fixation rectangle on the center of the screen
             elseif keyCode(KbName('p'))
@@ -317,7 +316,7 @@ function ShapeColor(subject, counterbalance_indx, run, IMA)
             juiceDistTime = GetSecs;
             timeSinceLastJuice = GetSecs-juiceDistTime;
         end
-        if timeSinceLastJuice > rewardDur % This won't have the best timing since its linked to the fliprate
+        if timeSinceLastJuice > rewardDur % Linked to the fliprate
             DAQ('SetBit',[0 0 0 0]);
         end
         

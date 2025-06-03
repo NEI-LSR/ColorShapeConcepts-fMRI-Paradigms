@@ -33,7 +33,7 @@ function [params] = generateRunInfo(params)
     Complete = repmat(params.complete,params.numblocks,1);
 
     % Calculate percent fixation and save out eyetrace
-    pixPerDeg = 1920/(rad2deg(atan(1/57))*38.2); % Calculate the true pixels per degree
+    pixPerDeg = 1920/(rad2deg(atan(1/57))*38.2); % Calculate the pixels per degree
     screenWidth = 1920; % Screen width
     screenHeight = 1080; % Screen height
     blocklength = params.blocklength;

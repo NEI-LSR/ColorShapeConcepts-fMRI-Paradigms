@@ -49,15 +49,17 @@ end
 % Screen information
 params.expscreen = 2; % Experimenter's Screen
 params.viewscreen = 1; % Subject's Screen
-params.pixPerAngle = 40; % Number of pixels per degree of visual stimuli. 
+params.pixPerAngle = 1920/(rad2deg(atan(1/57))*38.2); % Number of pixels per degree of visual angle, rounds to 50.00
+params.pixScaleFactor = 40/params.pixPerAngle; % This corrects for an initial error in the pixPerAngle measurement and reflects the true
+% values of the params relying on pixPerAngle 
 
-% Now set up parametesr for the particular experiment you're running
-% In this case Shape Color Attention
+% Now set up parameters for the particular experiment you're running
+% In this case Shape Color Active
 params.choiceDur = 0.7; % Seconds, how long to fixate at choice to get a reward
 params.choiceRewardDur = 0.15; % Seconds, how long the reward is for correct choice
 params.endGrayDur = 12; % Seconds, how long gray is on at end of experiment
 params.startGrayDur = 9; % Seconds, how long gray is on at start of experiment
-params.choiceDistAngle = 4; % Degrees Visual Angle, how distant the choices will be 
+params.choiceDistAngle = 4; % Degrees Visual Angle, how distant the choices will be- really is 3.2 because of pixScaleFactor
 params.stimDur = 3; % TRs, how many TRs the stimulus will be on
 params.grayDur = 0; % TRs, how many TRs the gray will be after the stimulus
 params.choiceSectionDur = 1; % TRs, how many TRs the choice will be on. If not choice stimulus, will be gray

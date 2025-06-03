@@ -1,9 +1,8 @@
 function [params] = SC(params)
     % Shape Color Paradigm 5.0
     % Stuart J. Duffield December 2022
-    % Displays the stimuli from the Monkey Turk experiments
-    % Occasiasonally will display a probe to make sure the subject it
-    % paying attention. This probe is a 4-AFC task, for which a correct
+    % Displays the stimuli from the ColorShapeConcepts experiments
+    % This probe is a 4-AFC task, for which a correct
     % response results in a reward. Previous versions of the attention task
     % had a 2-AFC task. The 4-AFC resembles the final tablet task the
     % animals were trained on.
@@ -44,10 +43,10 @@ function [params] = SC(params)
 
 
     % Load Textures:
-    load(fullfile(params.stimDir,'achrom.mat'), 'achrom'); % Achromatic Shapes
-    load(fullfile(params.stimDir,'chrom.mat'), 'chrom'); % Chromatic Shapes
-    load(fullfile(params.stimDir,'chromBW.mat'), 'chromBW'); % Chromatic Shapes Black and White
-    load(fullfile(params.stimDir,'colorcircles.mat'), 'colorcircles'); % Colored Circles
+    load(fullfile(params.stimDir,'achrom.mat'), 'achrom'); % Achromatic Shapes (colorless non-color-associated shapes)
+    load(fullfile(params.stimDir,'chrom.mat'), 'chrom'); % Chromatic Shapes (colored shapes)
+    load(fullfile(params.stimDir,'chromBW.mat'), 'chromBW'); % Chromatic Shapes Black and White (colorless color-associated shapes)
+    load(fullfile(params.stimDir,'colorcircles.mat'), 'colorcircles'); % Colored Circles (colored blobs)
 
 
 
@@ -65,10 +64,10 @@ function [params] = SC(params)
     [xCenter, yCenter] = RectCenter(viewRect); % Get center of the view screen
     [xCenterExp, yCenterExp] = RectCenter(expRect); % Get center of the experimentor's screen
 
-    params.stimPix = 6*params.pixPerAngle; % How large the stimulus rectangle will be
-    params.jitterPix = 1*params.pixPerAngle; % How large the jitter will be
-    params.fixPix = 3*params.pixPerAngle; % How large the params.fixation circle will be
-    params.distPix = params.choiceDistAngle*params.pixPerAngle; % How far apart the choices will be
+    params.stimPix = 6*params.pixperAngle*params.pixScaleFactor; % How large the stimulus rectangle will be, i.e., 240 pixels, or 4.8 degrees visual angle
+    params.jitterPix = 1*params.pixPerAngle*params.pixScaleFactor; % How large the jitter will be
+    params.fixPix = 3*params.pixPerAngle*params.pixScaleFactor; % How large the params.fixation circle will be
+    params.distPix = params.choiceDistAngle*params.pixPerAngle*params.pixScaleFactor; % How far apart the choices will be
 
     params.fixCrossDimPix = 10; % params.fixation cross arm length
     params.lineWidthPix = 2; % params.fixation cross arm thickness
@@ -450,8 +449,8 @@ function [params] = SC(params)
                 elseif keyCode(KbName('2@')) && params.rewardWaitJitter > params.rewardWaitChange
                     params.rewardWait = params.rewardWaitJitter-params.rewardWaitChange;
                     keyIsDown = 0;
-                elseif keyCode(KbName('w')) && params.fixPix > params.pixPerAngle/2 % Increase params.fixation circle
-                    params.fixPix = params.fixPix - params.pixPerAngle/2; % Shrink params.fixPix by half a degree of visual angle
+                elseif keyCode(KbName('w')) && params.fixPix > params.pixPerAngle*params.pixScaleFactor/2 % Increase params.fixation circle
+                    params.fixPix = params.fixPix - params.pixPerAngle*params.pixScaleFactor/2; % Shrink params.fixPix by about half a degree of visual angle
                     params.baseFixRect = [0 0 params.fixPix params.fixPix]; % Size of the params.fixation circle
                     params.fixRect = CenterRectOnPointd(params.baseFixRect, xCenterExp, yCenterExp); % We center the params.fixation rectangle on the center of the screen
                     params.fixUpperRightRect = CenterRectOnPointd(params.fixRect*params.fixRectMult,xCenterExp+params.horzDist,yCenterExp-params.vertDist); % Create upper right choice rectangle (Index 1, clockwise)
@@ -461,8 +460,8 @@ function [params] = SC(params)
                     params.fixRects = {params.fixUpperRightRect,params.fixLowerRightRect,params.fixLowerLeftRect,params.fixUpperLeftRect}; % Cell array of params.fixation choice rects, this needs to be repeated later in the main code for updating
 
                     keyIsDown=0;
-                elseif keyCode(KbName('s')) && params.fixPix < params.pixPerAngle*10
-                    params.fixPix = params.fixPix + params.pixPerAngle/2; % Increase params.fixPix by half a degree of visual angle
+                elseif keyCode(KbName('s')) && params.fixPix < params.pixPerAngle*params.pixScaleFactor*10
+                    params.fixPix = params.fixPix + params.pixPerAngle*params.pixScaleFactor/2; % Increase params.fixPix by about half a degree of visual angle
                     params.baseFixRect = [0 0 params.fixPix params.fixPix]; % Size of the params.fixation circle
                     params.fixRect = CenterRectOnPointd(params.baseFixRect, xCenterExp, yCenterExp); % We center the params.fixation rectangle on the center of the screen
                     params.fixUpperRightRect = CenterRectOnPointd(params.fixRect*params.fixRectMult,xCenterExp+params.horzDist,yCenterExp-params.vertDist); % Create upper right choice rectangle (Index 1, clockwise)
